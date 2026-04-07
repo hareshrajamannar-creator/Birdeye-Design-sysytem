@@ -6,7 +6,7 @@
   "scripts": {
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "build": "tsc -b"
+    "build": "tsc -p tsconfig.build.json"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
@@ -99,5 +99,16 @@
     "react-dom": {
       "optional": true
     }
-  }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ]
 }

@@ -20,6 +20,13 @@ git clone https://github.com/balajik-cmyk/aero-ds.git
 cd aero-ds
 ```
 
+SSH (when your GitHub SSH config uses a host alias for this account, e.g. `github-balajik`):
+
+```bash
+git clone git@github-balajik:balajik-cmyk/aero-ds.git
+cd aero-ds
+```
+
 ### 2. Install dependencies
 
 ```bash
@@ -38,6 +45,14 @@ Storybook will start at [http://localhost:6006](http://localhost:6006).
 
 ```bash
 npm run build-storybook
+```
+
+### 5. Build the published package (TypeScript)
+
+Emits `dist/` for the npm entry (`cn` helper and `package.json` `exports`). This is a narrow build and does not typecheck the full Storybook tree.
+
+```bash
+npm run build
 ```
 
 ## Publishing
