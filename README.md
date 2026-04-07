@@ -41,6 +41,10 @@ npm run storybook
 
 Storybook will start at [http://localhost:6006](http://localhost:6006).
 
+### Design workflow (AI / agents)
+
+The **Aero DS** project skill tells Cursor and Claude Code to use **Storybook** and **token CSS** as sources of truth—not generic CSV palettes. See **[`.claude/skills/aero-ds/SKILL.md`](.claude/skills/aero-ds/SKILL.md)** (full guide: **How it works**, **Compatibility**, guardrails). If your tool only scans `.cursor/skills/`, open **[`.cursor/skills/aero-ds/SKILL.md`](.cursor/skills/aero-ds/SKILL.md)**—it points to the same content.
+
 ### 4. Build Storybook (static)
 
 ```bash
