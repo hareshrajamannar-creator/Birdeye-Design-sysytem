@@ -2,9 +2,10 @@ import {
   IconStrip, L2NavPanel, ReviewsL2NavPanel, SocialL2NavPanel, SearchAIL2NavPanel,
   ContactsL2NavPanel, AgentsL2NavPanel, ListingsL2NavPanel, TicketingL2NavPanel,
   CampaignsL2NavPanel, SurveysL2NavPanel, InsightsL2NavPanel, CompetitorsL2NavPanel,
-  InboxL2NavPanel, MynaConversationsL2NavPanel,
+  AppointmentsL2NavPanel, InboxL2NavPanel, MynaConversationsL2NavPanel,
 } from "./components/Sidebar";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { usePersistedState } from "./hooks/usePersistedState";
 import { Toaster } from "sonner";
 import { MonitorNotificationsProvider } from "./context/MonitorNotificationsContext";
 import { TopBar } from "./components/TopBar";
@@ -15,7 +16,12 @@ import { ComponentShowcase } from "./components/ComponentShowcase";
 import { ReviewsView } from "./components/ReviewsView";
 import { SocialView } from "./components/SocialView";
 import { SearchAIView } from "./components/SearchAIView";
-import { ContactsView } from "./components/ContactsView";
+import {
+  ContactsView,
+  CONTACTS_L2_KEY_ALL,
+  type ContactsAppBridge,
+  type ContactsSheetMode,
+} from "./components/ContactsView";
 import { ScheduledDeliveriesView } from "./components/ScheduledDeliveriesView";
 import { AgentsMonitorView } from "./components/AgentsMonitorView";
 import { AnalyzePerformanceView } from "./components/AnalyzePerformanceView";
@@ -24,16 +30,57 @@ import { AgentDetailView } from "./components/AgentDetailView";
 import { AgentOnboardingView } from "./components/AgentOnboardingView";
 import { ScheduleBuilderView } from "./components/ScheduleBuilderView";
 import { BirdAIReportsView } from "./components/BirdAIReportsView";
+import { BirdAIJourneysPlaceholderView } from "./components/BirdAIJourneysPlaceholderView";
+import { ReferralsView } from "./components/ReferralsView";
+import { PaymentsView } from "./components/PaymentsView";
+import { AppointmentsView } from "./components/AppointmentsView";
+import { SurveysView } from "./components/SurveysView";
+import { TicketingView } from "./components/TicketingView";
+import { ListingsView } from "./components/ListingsView";
+import { CampaignsView } from "./components/CampaignsView";
+import { CompetitorsView } from "./components/CompetitorsView";
 import { type DraftReport } from "./components/draftStore";
-import { APP_MAIN_CONTENT_SHELL_CLASS } from "./components/layout/appShellClasses";
+import {
+  APP_MAIN_CONTENT_SHELL_CLASS,
+  APP_SHELL_BELOW_TOPBAR_CARD_CLASS,
+  APP_SHELL_GUTTER_SURFACE_CLASS,
+} from "./components/layout/appShellClasses";
 import { ResizableRightChatPanel } from "./components/layout/ResizableRightChatPanel";
 import { MynaChatPanel } from "./components/MynaChatPanel";
 import BusinessOverviewDashboard from "./components/BusinessOverviewDashboard";
-import { getAppViewTitle } from "./appViewTitle";
+import {
+  getAppViewTitle,
+  LOGIN_TAB_TITLES,
+  LOGIN_TAB_TITLE_COUNT,
+} from "./appViewTitle";
 import { l2KeyFromConversation } from "./myna/mynaL2NavKeys";
 import { useMynaConversations } from "./myna/useMynaConversations";
 import { ShortcutsModal } from "./shortcuts/ShortcutsModal";
 import { useShortcuts } from "./shortcuts/useShortcuts";
+import { ConversationStream } from "./components/ConversationStream";
+import { BirdAILoginPage } from "./components/auth/BirdAILoginPage";
+import { AppBootShimmer } from "./components/layout/AppBootShimmer";
+import { SEARCH_AI_L2_DEFAULT_ACTIVE } from "./components/searchai/searchAIL2Keys";
+
+const AUTH_STORAGE_KEY = "birdai_demo_authenticated";
+const LOGIN_TAB_TITLE_INDEX_KEY = "auth:login_tab_title_index";
+
+function parseStoredLoginTabIndex(raw: string | null): number {
+  if (raw === null) return 0;
+  const n = Number.parseInt(raw, 10);
+  if (Number.isNaN(n)) return 0;
+  return ((n % LOGIN_TAB_TITLE_COUNT) + LOGIN_TAB_TITLE_COUNT) % LOGIN_TAB_TITLE_COUNT;
+}
+
+function readDemoAuthenticated(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    // Opt-in: missing key (fresh tab / new deployment) = not authenticated
+    return sessionStorage.getItem(AUTH_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
 
 export type AppView =
   | "business-overview"
@@ -53,23 +100,137 @@ export type AppView =
   | "agents-onboarding"
   | "schedule-builder"
   | "birdai-reports"
+  | "birdai-journeys"
   | "listings"
   | "surveys"
   | "ticketing"
   | "campaigns"
   | "insights"
-  | "competitors";
+  | "competitors"
+  | "referrals"
+  | "payments"
+  | "appointments"
+  | "conversation-stream";
+
+/** Brief shell shimmer after login so the first paint mirrors real app loading. */
+const POST_LOGIN_BOOT_MS = 1200;
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => readDemoAuthenticated());
+  const [postLoginBoot, setPostLoginBoot] = useState(false);
+
+  const signIn = useCallback(() => {
+    try {
+      sessionStorage.setItem(AUTH_STORAGE_KEY, "true");
+      // Always land on Reviews after login
+      sessionStorage.setItem("nav:l1", JSON.stringify("reviews"));
+    } catch {
+      /* ignore */
+    }
+    setIsAuthenticated(true);
+    setPostLoginBoot(true);
+  }, []);
+
+  useEffect(() => {
+    if (!postLoginBoot) return;
+    const t = window.setTimeout(() => setPostLoginBoot(false), POST_LOGIN_BOOT_MS);
+    return () => window.clearTimeout(t);
+  }, [postLoginBoot]);
+
+  const signOut = useCallback(() => {
+    try {
+      sessionStorage.setItem(AUTH_STORAGE_KEY, "false");
+      const cur = parseStoredLoginTabIndex(sessionStorage.getItem(LOGIN_TAB_TITLE_INDEX_KEY));
+      sessionStorage.setItem(
+        LOGIN_TAB_TITLE_INDEX_KEY,
+        String((cur + 1) % LOGIN_TAB_TITLE_COUNT),
+      );
+      // Clear nav state so next session starts fresh
+      Object.keys(sessionStorage)
+        .filter((k) => k.startsWith("nav:"))
+        .forEach((k) => sessionStorage.removeItem(k));
+    } catch {
+      /* ignore */
+    }
+    setIsAuthenticated(false);
+  }, []);
+
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<AppView>("agents-monitor");
+  const [currentView, setCurrentView] = usePersistedState<AppView>("nav:l1", "reviews");
   const [editingDraft, setEditingDraft] = useState<DraftReport | null>(null);
-  const [selectedAgentSlug, setSelectedAgentSlug] = useState<string>("");
-  const [selectedAnalyzeItem, setSelectedAnalyzeItem] = useState<string>("overview");
+  const [selectedAgentSlug, setSelectedAgentSlug] = usePersistedState<string>("nav:l2:agents", "");
+  const [selectedAnalyzeItem, setSelectedAnalyzeItem] = usePersistedState<string>("nav:l2:agents:analyze", "overview");
+  /** Journeys L2 compound key — synced when navigating via `l2:` slug prefix in handleViewChange. */
+  const [journeysL2ActiveKey, setJourneysL2ActiveKey] = usePersistedState<string>(
+    "nav:journeys-l2-key",
+    "Agents/workflow",
+  );
+
+  const [contactsL2Active, setContactsL2Active] = usePersistedState("nav:l2:contacts", CONTACTS_L2_KEY_ALL);
+  const [contactsSheetMode, setContactsSheetMode] = useState<ContactsSheetMode>("none");
+  const [contactsDetailId, setContactsDetailId] = useState<number | null>(null);
+  const [contactsQuickViewId, setContactsQuickViewId] = useState<number | null>(null);
+
+  const handleContactsL2Change = useCallback((key: string) => {
+    setContactsL2Active(key);
+    setContactsDetailId(null);
+    setContactsSheetMode("none");
+    setContactsQuickViewId(null);
+  }, []);
+
+  const handleContactsAddContact = useCallback(() => {
+    setContactsSheetMode("addContact");
+    setContactsQuickViewId(null);
+  }, []);
+
+  const contactsApp = useMemo<ContactsAppBridge>(
+    () => ({
+      l2ActiveItem: contactsL2Active,
+      onL2ActiveItemChange: handleContactsL2Change,
+      sheetMode: contactsSheetMode,
+      onSheetModeChange: setContactsSheetMode,
+      detailContactId: contactsDetailId,
+      onDetailContactIdChange: setContactsDetailId,
+      quickViewContactId: contactsQuickViewId,
+      onQuickViewContactIdChange: setContactsQuickViewId,
+    }),
+    [
+      contactsL2Active,
+      handleContactsL2Change,
+      contactsSheetMode,
+      contactsDetailId,
+      contactsQuickViewId,
+    ],
+  );
+
+  useEffect(() => {
+    if (currentView !== "contacts") {
+      setContactsL2Active(CONTACTS_L2_KEY_ALL);
+      setContactsSheetMode("none");
+      setContactsDetailId(null);
+      setContactsQuickViewId(null);
+    }
+  }, [currentView]);
+
+  const [searchAIL2Active, setSearchAIL2Active] = usePersistedState("nav:l2:searchai", SEARCH_AI_L2_DEFAULT_ACTIVE);
+  const handleSearchAIL2Change = useCallback((key: string) => {
+    setSearchAIL2Active(key);
+  }, []);
+
+  useEffect(() => {
+    if (currentView !== "searchai") {
+      setSearchAIL2Active(SEARCH_AI_L2_DEFAULT_ACTIVE);
+    }
+  }, [currentView]);
 
   const handleViewChange = useCallback((view: AppView, slug?: string) => {
     if (view !== currentView) {
       setMynaChatExpanded(false);
+    }
+    if (slug?.startsWith("l2:")) {
+      setJourneysL2ActiveKey(slug.slice(3));
+      setCurrentView(view);
+      return;
     }
     setCurrentView(view);
     if (slug) {
@@ -121,6 +282,15 @@ export default function App() {
   useEffect(() => {
     if (!mynaChatOpen) setMynaChatExpanded(false);
   }, [mynaChatOpen]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const idx = parseStoredLoginTabIndex(sessionStorage.getItem(LOGIN_TAB_TITLE_INDEX_KEY));
+      document.title = LOGIN_TAB_TITLES[idx];
+      return;
+    }
+    document.title = `${getAppViewTitle(currentView)} – Birdeye`;
+  }, [isAuthenticated, currentView]);
 
   const mynaWorkspaceExpanded = mynaChatOpen && mynaChatExpanded && !aiPanelOpen;
 
@@ -174,6 +344,24 @@ export default function App() {
   }, []);
 
   // Views that have their own L2 panels (not the default Reports L2NavPanel)
+  if (!isAuthenticated) {
+    return (
+      <>
+        <Toaster position="top-center" richColors />
+        <BirdAILoginPage onAuthenticated={signIn} />
+      </>
+    );
+  }
+
+  if (postLoginBoot) {
+    return (
+      <>
+        <Toaster position="top-center" richColors />
+        <AppBootShimmer />
+      </>
+    );
+  }
+
   const hasOwnL2Panel = (v: AppView) =>
     v === "business-overview" ||
     v === "inbox" ||
@@ -189,12 +377,16 @@ export default function App() {
     v === "agent-detail" ||
     v === "agents-onboarding" ||
     v === "birdai-reports" ||
+    v === "birdai-journeys" ||
     v === "listings" ||
     v === "surveys" ||
     v === "ticketing" ||
     v === "campaigns" ||
     v === "insights" ||
-    v === "competitors";
+    v === "competitors" ||
+    v === "referrals" ||
+    v === "payments" ||
+    v === "appointments";
 
   return (
     <MonitorNotificationsProvider
@@ -216,6 +408,7 @@ export default function App() {
         currentView={currentView}
         onViewChange={handleViewChange}
         onOpenKeyboardShortcuts={() => setShortcutsModalOpen(true)}
+        onSignOut={signOut}
       />
 
       {/* Everything to the right of the icon strip */}
@@ -229,7 +422,10 @@ export default function App() {
         />
 
         {/* Below TopBar: L2 nav + main content side by side */}
-        <div className="flex-1 flex min-h-0 overflow-hidden bg-[#e0e5eb] dark:bg-[#13161b] transition-colors duration-300">
+        <div
+          className={`flex-1 flex min-h-0 overflow-hidden pr-[10px] pb-[10px] pl-0 ${APP_SHELL_GUTTER_SURFACE_CLASS}`}
+        >
+          <div className={APP_SHELL_BELOW_TOPBAR_CARD_CLASS}>
 
           {/* Myna fullscreen: conversation L2 replaces product L2 */}
           {mynaWorkspaceExpanded && (
@@ -256,11 +452,18 @@ export default function App() {
           )}
           {/* Search AI L2 nav panel */}
           {!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "searchai" && (
-            <SearchAIL2NavPanel />
+            <SearchAIL2NavPanel
+              activeItem={searchAIL2Active}
+              onActiveItemChange={handleSearchAIL2Change}
+            />
           )}
           {/* Contacts L2 nav panel */}
           {!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "contacts" && (
-            <ContactsL2NavPanel />
+            <ContactsL2NavPanel
+              activeItem={contactsL2Active}
+              onActiveItemChange={handleContactsL2Change}
+              onAddContact={handleContactsAddContact}
+            />
           )}
           {/* Listings L2 nav panel */}
           {!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "listings" && (
@@ -286,13 +489,23 @@ export default function App() {
           {!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "competitors" && (
             <CompetitorsL2NavPanel />
           )}
+          {/* Appointments L2 nav panel */}
+          {!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "appointments" && (
+            <AppointmentsL2NavPanel />
+          )}
           {/* Inbox L2 nav panel */}
           {!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "inbox" && (
             <InboxL2NavPanel />
           )}
-          {/* Agents L2 nav panel */}
-          {!aiPanelOpen && !mynaWorkspaceExpanded && (currentView === "agents-monitor" || currentView === "agents-analyze-performance" || currentView === "agents-builder" || currentView === "agents-onboarding" || currentView === "agent-detail" || currentView === "birdai-reports") && (
-            <AgentsL2NavPanel currentView={currentView} onViewChange={handleViewChange} selectedAgentSlug={selectedAgentSlug} selectedAnalyzeItem={selectedAnalyzeItem} />
+          {/* Agents L2 nav panel — suppressed for agents-builder (creation layout takes full width) */}
+          {!aiPanelOpen && !mynaWorkspaceExpanded && (currentView === "agents-monitor" || currentView === "agents-analyze-performance" || currentView === "agents-onboarding" || currentView === "agent-detail" || currentView === "birdai-reports" || currentView === "birdai-journeys") && (
+            <AgentsL2NavPanel
+              currentView={currentView}
+              onViewChange={handleViewChange}
+              selectedAgentSlug={selectedAgentSlug}
+              selectedAnalyzeItem={selectedAnalyzeItem}
+              journeysL2ActiveKey={journeysL2ActiveKey}
+            />
           )}
 
           {/* Main content + optional Myna chat (flex row, main keeps ≥60% when possible) */}
@@ -317,9 +530,9 @@ export default function App() {
             ) : currentView === "social" ? (
               <SocialView />
             ) : currentView === "searchai" ? (
-              <SearchAIView />
+              <SearchAIView l2ActiveItem={searchAIL2Active} />
             ) : currentView === "contacts" ? (
-              <ContactsView />
+              <ContactsView app={contactsApp} />
             ) : currentView === "scheduled-deliveries" ? (
               <ScheduledDeliveriesView onCreateSchedule={() => handleViewChange("schedule-builder")} />
             ) : currentView === "agents-monitor" ? (
@@ -352,30 +565,16 @@ export default function App() {
               <ScheduleBuilderView onBack={() => handleViewChange("agent-detail", "scheduled-reports")} />
             ) : currentView === "birdai-reports" ? (
               <BirdAIReportsView />
+            ) : currentView === "birdai-journeys" ? (
+              <BirdAIJourneysPlaceholderView journeysL2Key={journeysL2ActiveKey} />
             ) : currentView === "listings" ? (
-              <Dashboard
-                aiPanelOpen={aiPanelOpen}
-                onAiPanelChange={handleAiPanelChange}
-                editingDraft={editingDraft}
-              />
+              <ListingsView />
             ) : currentView === "surveys" ? (
-              <Dashboard
-                aiPanelOpen={aiPanelOpen}
-                onAiPanelChange={handleAiPanelChange}
-                editingDraft={editingDraft}
-              />
+              <SurveysView />
             ) : currentView === "ticketing" ? (
-              <Dashboard
-                aiPanelOpen={aiPanelOpen}
-                onAiPanelChange={handleAiPanelChange}
-                editingDraft={editingDraft}
-              />
+              <TicketingView />
             ) : currentView === "campaigns" ? (
-              <Dashboard
-                aiPanelOpen={aiPanelOpen}
-                onAiPanelChange={handleAiPanelChange}
-                editingDraft={editingDraft}
-              />
+              <CampaignsView />
             ) : currentView === "insights" ? (
               <Dashboard
                 aiPanelOpen={aiPanelOpen}
@@ -383,11 +582,15 @@ export default function App() {
                 editingDraft={editingDraft}
               />
             ) : currentView === "competitors" ? (
-              <Dashboard
-                aiPanelOpen={aiPanelOpen}
-                onAiPanelChange={handleAiPanelChange}
-                editingDraft={editingDraft}
-              />
+              <CompetitorsView />
+            ) : currentView === "referrals" ? (
+              <ReferralsView />
+            ) : currentView === "payments" ? (
+              <PaymentsView />
+            ) : currentView === "appointments" ? (
+              <AppointmentsView />
+            ) : currentView === "conversation-stream" ? (
+              <ConversationStream />
             ) : (
               <Dashboard
                 aiPanelOpen={aiPanelOpen}
@@ -404,6 +607,7 @@ export default function App() {
             >
               {mynaChatPanelEl}
             </ResizableRightChatPanel>
+          </div>
           </div>
         </div>
       </div>
