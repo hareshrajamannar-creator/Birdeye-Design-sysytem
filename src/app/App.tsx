@@ -61,6 +61,7 @@ import { ConversationStream } from "./components/ConversationStream";
 import { BirdAILoginPage } from "./components/auth/BirdAILoginPage";
 import { AppBootShimmer } from "./components/layout/AppBootShimmer";
 import { SEARCH_AI_L2_DEFAULT_ACTIVE } from "./components/searchai/searchAIL2Keys";
+import { UnwiredModuleView } from "./components/UnwiredModuleView";
 
 const AUTH_STORAGE_KEY = "birdai_demo_authenticated";
 const LOGIN_TAB_TITLE_INDEX_KEY = "auth:login_tab_title_index";
@@ -587,11 +588,9 @@ export default function App() {
             ) : currentView === "conversation-stream" ? (
               <ConversationStream />
             ) : (
-              <Dashboard
-                aiPanelOpen={aiPanelOpen}
-                onAiPanelChange={handleAiPanelChange}
-                editingDraft={editingDraft}
-              />
+              // Any route added to AppView but not yet wired up shows a
+              // helpful placeholder instead of a blank screen.
+              <UnwiredModuleView currentView={currentView} />
             )}
             </div>
             ) : null}

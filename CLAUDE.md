@@ -121,14 +121,48 @@ Wire in `App.tsx` in the main content render chain:
 - **Font**: Already loaded via `src/tokens/fonts.css` — do not import fonts manually
 - **Icons**: Import from `lucide-react` or `@phosphor-icons/react` only
 
+## ALWAYS start from the template
+
+When building any new feature module, **always copy `TemplateModuleView.tsx` first**:
+
+```bash
+cp src/app/components/TemplateModuleView.tsx src/app/components/YourFeatureView.tsx
+```
+
+The template already has:
+- `ModuleHeader` wired up with title, subtitle, and action buttons
+- A search input
+- A data table with status badges and row actions
+- Correct Tailwind token classes (no raw hex)
+- Inline comments explaining every section
+
+Rename "Template" → "YourFeature" throughout, then replace mock data with real data.
+
+## Shared layout components
+
+```
+src/app/components/layout/ModuleHeader.tsx  ← use for ALL page headers
+```
+
+```tsx
+import { ModuleHeader } from "@/app/components/layout/ModuleHeader";
+
+<ModuleHeader
+  title="Your Module"
+  subtitle="Optional description"
+  actions={<Button size="sm">Primary action</Button>}
+  tabs={<Tabs>...</Tabs>}
+/>
+```
+
 ## Reference: look at existing modules before building
 
 The best way to understand patterns is to read existing views:
+- **Template (start here)** → `src/app/components/TemplateModuleView.tsx`
 - Simple list view → `src/app/components/ReviewsView.v1.tsx`
 - Data table view → `src/app/components/ContactsView.v1.tsx`
 - Dashboard with charts → `src/app/components/BusinessOverviewDashboard.tsx`
 - Form-heavy view → `src/app/components/ScheduleBuilderView.tsx`
-- Empty state → any `*View.tsx` with no data
 
 ## Common mistakes that cause blank screens
 
@@ -137,6 +171,9 @@ The best way to understand patterns is to read existing views:
 3. **CSS class typo** — Tailwind classes are case-sensitive
 4. **Returning null accidentally** — make sure your component always returns JSX
 5. **Missing export** — ensure `export function YourModuleView()` not just `function YourModuleView()`
+
+> If you add a route but forget to wire the view, the app now shows a helpful
+> `UnwiredModuleView` with exact instructions instead of a blank screen.
 
 ## Design version
 
