@@ -14,6 +14,7 @@ import { L1_STRIP_ICON_SIZE, L1_STRIP_ICON_STROKE_PX } from "./l1StripIconTokens
 import { MonitorNotificationsTrigger } from "./MonitorNotificationsTrigger";
 import { useTheme, type ThemePreference } from "./useTheme";
 import { L2NavLayout, PANEL, ROW, HOVER, CHILD_ACTIVE, CHILD_INACTIVE, FOOTER_ROW_CLS, SECTION_HEADER } from "./L2NavLayout";
+import { useL2NavBridgeSetter } from "@/app/context/L2NavBridgeContext";
 
 /** How long to show the Reports-row shimmer before opening the tab (~sub-second “micro” handoff). */
 export const REPORTS_EXTERNAL_SHIMMER_MS = 480;
@@ -875,8 +876,12 @@ const teamSections = [
 
 export function InboxL2NavPanel() {
   const [activeItem, setActiveItem] = useState("standalone/All messages");
+  const publishToBridge = useL2NavBridgeSetter();
 
-  const activate = (key: string) => setActiveItem(key);
+  const activate = (key: string) => {
+    setActiveItem(key);
+    publishToBridge(key);
+  };
 
   // Inbox sections: "Assignment" expanded by default
   const [inboxExpanded, setInboxExpanded] = useState<Record<string, boolean>>(() =>
