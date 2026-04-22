@@ -1,4 +1,18 @@
 import { useState, useRef, useEffect } from "react";
+
+/* ─── Contacts app bridge types (consumed by App.tsx shell) ─── */
+export const CONTACTS_L2_KEY_ALL = "all" as const;
+export type ContactsSheetMode = "none" | "addContact" | "editContact";
+export interface ContactsAppBridge {
+  l2ActiveItem: string;
+  onL2ActiveItemChange: (key: string) => void;
+  sheetMode: ContactsSheetMode;
+  onSheetModeChange: (mode: ContactsSheetMode) => void;
+  detailContactId: number | null;
+  onDetailContactIdChange: (id: number | null) => void;
+  quickViewContactId: number | null;
+  onQuickViewContactIdChange: (id: number | null) => void;
+}
 import {
   ChevronDown,
   ChevronLeft,
@@ -116,7 +130,7 @@ function ContextMenu({ x, y, onClose, onAction }: { x: number; y: number; onClos
 /* ═══════════════════════════════════════════
    Contacts View – Main export
    ═══════════════════════════════════════════ */
-export function ContactsView() {
+export function ContactsView(_props?: { app?: ContactsAppBridge }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState<string>("lastActivity");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");

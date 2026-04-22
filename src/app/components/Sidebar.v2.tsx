@@ -696,7 +696,7 @@ const searchAIConfig = {
   ],
 };
 
-export function SearchAIL2NavPanel() {
+export function SearchAIL2NavPanel(_props?: { activeItem?: string; onActiveItemChange?: (key: string) => void }) {
   return <L2NavLayout {...searchAIConfig} data-no-print />;
 }
 
@@ -711,7 +711,7 @@ const contactsConfig = {
   ],
 };
 
-export function ContactsL2NavPanel() {
+export function ContactsL2NavPanel(_props?: { activeItem?: string; onActiveItemChange?: (key: string) => void; onAddContact?: () => void }) {
   return <L2NavLayout {...contactsConfig} data-no-print />;
 }
 
@@ -993,6 +993,21 @@ export function InboxL2NavPanel() {
 export { AgentsL2NavPanel } from "./AgentsL2NavPanel";
 
 export { MynaConversationsL2NavPanel } from "./MynaConversationsL2NavPanel";
+
+/* ═══════════════════════════════════════════
+   Appointments L2 Nav Panel
+   ═══════════════════════════════════════════ */
+const appointmentsConfig = {
+  sections: [
+    { label: "Overview", children: ["Calendar", "Upcoming", "Waitlist"] },
+    { label: "Manage", children: ["Services", "Staff", "Locations"] },
+    { label: "Settings", children: ["Notifications", "Integrations"] },
+  ],
+};
+
+export function AppointmentsL2NavPanel() {
+  return <L2NavLayout {...appointmentsConfig} data-no-print />;
+}
 
 /* ═══════════════════════════════════════════
    Legacy combined Sidebar export (backward compat)

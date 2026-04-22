@@ -4,14 +4,21 @@
   "description": "Aero Design System — UI component library and Storybook for BirdAI",
   "type": "module",
   "scripts": {
+    "dev": "vite",
+    "build:app": "vite build",
+    "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "build": "tsc -p tsconfig.build.json"
+    "build:lib": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@mui/icons-material": "7.3.5",
@@ -90,19 +97,7 @@
     "typescript": "^6.0.2",
     "vite": "6.3.5"
   },
-  "peerDependencies": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    }
-  },
-  "main": "./dist/index.js",
+"main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
