@@ -62,7 +62,7 @@ import { BirdAILoginPage } from "./components/auth/BirdAILoginPage";
 import { AppBootShimmer } from "./components/layout/AppBootShimmer";
 import { SEARCH_AI_L2_DEFAULT_ACTIVE } from "./components/searchai/searchAIL2Keys";
 import { UnwiredModuleView } from "./components/UnwiredModuleView";
-import { BirdeyeAssistView } from "./components/BirdeyeAssistView";
+import { L2NavBridgeProvider } from "./context/L2NavBridgeContext";
 
 const AUTH_STORAGE_KEY = "birdai_demo_authenticated";
 const LOGIN_TAB_TITLE_INDEX_KEY = "auth:login_tab_title_index";
@@ -107,8 +107,7 @@ export type AppView =
   | "referrals"
   | "payments"
   | "appointments"
-  | "conversation-stream"
-  | "birdeye-assist";
+  | "conversation-stream";
 
 /** Brief shell shimmer after login so the first paint mirrors real app loading. */
 const POST_LOGIN_BOOT_MS = 1200;
@@ -387,6 +386,7 @@ export default function App() {
     v === "appointments";
 
   return (
+    <L2NavBridgeProvider currentView={currentView}>
     <MonitorNotificationsProvider
       onNavigateToMonitor={() => {
         setMynaChatExpanded(false);
@@ -589,8 +589,6 @@ export default function App() {
               <AppointmentsView />
             ) : currentView === "conversation-stream" ? (
               <ConversationStream />
-            ) : currentView === "birdeye-assist" ? (
-              <BirdeyeAssistView />
             ) : (
               // Any route added to AppView but not yet wired up shows a
               // helpful placeholder instead of a blank screen.
@@ -611,5 +609,6 @@ export default function App() {
       </div>
     </div>
     </MonitorNotificationsProvider>
+    </L2NavBridgeProvider>
   );
 }

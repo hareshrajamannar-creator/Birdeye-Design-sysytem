@@ -54,8 +54,6 @@ export function getAppViewTitle(view: AppView): string {
       return "BirdAI";
     case "conversation-stream":
       return "Conversation Stream";
-    case "birdeye-assist":
-      return "Birdeye Assist";
     default:
       return "Reports";
   }

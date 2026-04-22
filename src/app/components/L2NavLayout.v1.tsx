@@ -30,6 +30,7 @@
 
 import { useState } from "react";
 import { ChevronUp, ChevronDown, ExternalLink } from "lucide-react";
+import { useL2NavBridgeSetter } from "@/app/context/L2NavBridgeContext";
 
 /* ─────────────────────────────────────────────────────
    Design tokens — edit here to update every L2 panel
@@ -152,12 +153,16 @@ export function L2NavLayout({
   const [internalActive, setInternalActive] = useState(resolvedDefault);
   const active = controlledActive ?? internalActive;
 
+  // Publish to the module-level bridge so module views can react to L2 selections.
+  const publishToBridge = useL2NavBridgeSetter();
+
   const toggle = (label: string) =>
     setExpanded(prev => ({ ...prev, [label]: !prev[label] }));
 
   const activate = (key: string) => {
     setInternalActive(key);
     onActiveItemChange?.(key);
+    publishToBridge(key);
   };
 
   const plusBg = headerActionColor === "green" ? "bg-[#4caf50]" : "bg-[#1E44CC]";

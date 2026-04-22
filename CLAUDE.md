@@ -11,10 +11,10 @@ npm run storybook  # → http://localhost:6006 (component browser)
 ## What this repo is
 
 A fully working Birdeye product shell your team uses as a base to build features. It includes:
-- **L1 navigation** (left icon strip) — `src/app/components/Sidebar.tsx`
-- **L2 navigation** (per-module side panel) — `src/app/components/Sidebar.tsx`
+- **L1 navigation** (left icon strip) — `src/app/components/Sidebar.v2.tsx`
+- **L2 navigation** (per-module side panel) — `src/app/components/Sidebar.v2.tsx`
 - **TopBar** — `src/app/components/TopBar.tsx`
-- **25+ module views** (Reviews, Contacts, Agents, Social, Ticketing, etc.) — `src/app/components/`
+- **25+ reference module views** (Reviews, Contacts, Agents, Social, etc.) — `src/app/components/`
 - **All UI primitives** — `src/app/components/ui/` (Button, Card, Table, Input, Dialog, etc.)
 
 ## THE ONE RULE — read before writing any UI
@@ -23,157 +23,210 @@ A fully working Birdeye product shell your team uses as a base to build features
 
 Before writing any component, check if it already exists:
 ```
-src/app/components/ui/button.tsx       ← all buttons
-src/app/components/ui/card.tsx         ← all cards
-src/app/components/ui/table.tsx        ← all tables
-src/app/components/ui/input.tsx        ← all inputs
-src/app/components/ui/dialog.tsx       ← all modals/dialogs
-src/app/components/ui/sheet.tsx        ← all slide-over panels
-src/app/components/ui/tabs.tsx         ← all tabs
-src/app/components/ui/badge.tsx        ← all status badges
-src/app/components/ui/select.tsx       ← all dropdowns
-src/app/components/ui/form.tsx         ← all forms (react-hook-form)
-src/app/components/ui/chart.tsx        ← all charts (Recharts)
-src/app/components/ui/avatar.tsx       ← all avatars
-src/app/components/ui/checkbox.tsx     ← all checkboxes
-src/app/components/ui/switch.tsx       ← all toggles
-src/app/components/ui/skeleton.tsx     ← all loading states
-src/app/components/ui/dropdown-menu.tsx← all dropdown menus
-src/app/components/ui/tooltip.tsx      ← all tooltips
-src/app/components/ui/sonner.tsx       ← all toasts/notifications
+src/app/components/ui/button.tsx        ← all buttons
+src/app/components/ui/card.tsx          ← all cards
+src/app/components/ui/table.tsx         ← all tables
+src/app/components/ui/input.tsx         ← all inputs
+src/app/components/ui/dialog.tsx        ← all modals/dialogs
+src/app/components/ui/sheet.tsx         ← all slide-over panels
+src/app/components/ui/tabs.tsx          ← all tabs
+src/app/components/ui/badge.tsx         ← all status badges
+src/app/components/ui/select.tsx        ← all dropdowns
+src/app/components/ui/form.tsx          ← all forms (react-hook-form)
+src/app/components/ui/chart.tsx         ← all charts (Recharts)
+src/app/components/ui/avatar.tsx        ← all avatars
+src/app/components/ui/checkbox.tsx      ← all checkboxes
+src/app/components/ui/switch.tsx        ← all toggles
+src/app/components/ui/skeleton.tsx      ← all loading states
+src/app/components/ui/dropdown-menu.tsx ← all dropdown menus
+src/app/components/ui/tooltip.tsx       ← all tooltips
+src/app/components/ui/sonner.tsx        ← all toasts/notifications
 ```
 
 **Never install a new UI library. Never write a component from scratch if it exists above.**
 
+---
+
 ## How to add a new feature module (5 steps)
 
-### Step 1 — Add your route type
+### Step 1 — Copy the template
+```bash
+cp src/app/components/TemplateModuleView.tsx src/app/components/InventoryView.tsx
+```
+Open the new file — every step is annotated inside it.
+
+### Step 2 — Add your route to AppView
 In `src/app/App.tsx`, add your module name to the `AppView` union:
 ```ts
 export type AppView =
   | "reviews"
   | "contacts"
-  | "your-module-name"  // ← add this
+  | "inventory"   // ← add this
   | ...
 ```
 
-### Step 2 — Register the title
+### Step 3 — Register the title
 In `src/app/appViewTitle.ts`:
 ```ts
-case "your-module-name":
-  return "Your Module Title";
+case "inventory":
+  return "Inventory";
 ```
 
-### Step 3 — Add L1 icon
-In `src/app/components/Sidebar.tsx` (or the versioned file it re-exports from), add an entry to the icon strip for your module.
+### Step 4 — Add L1 icon + L2 panel
+In `src/app/components/Sidebar.v2.tsx`:
 
-### Step 4 — Create L2 nav panel (if needed)
-```tsx
-// src/app/components/YourModuleL2NavPanel.tsx
-export function YourModuleL2NavPanel() {
-  return (
-    <div className="w-[220px] flex flex-col shrink-0 border-r border-[#e5e9f0] dark:border-[#252b35]">
-      {/* nav items */}
-    </div>
-  );
-}
+**L1 icon** — add an entry to `iconStripItems`:
+```ts
+{ label: "Inventory", Icon: Package },
 ```
-Export from `Sidebar.tsx` and wire in `App.tsx` (follow the pattern of existing panels).
 
-### Step 5 — Create the module view
-```tsx
-// src/app/components/YourModuleView.tsx
-import { Button } from "@/app/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table";
+**Click handler** — in the `onClick` of `IconStrip`:
+```ts
+else if (label === "Inventory") onViewChange("inventory");
+```
 
-export function YourModuleView() {
-  return (
-    <div className="flex flex-col h-full min-h-0">
-      {/* Page header */}
-      <div className="shrink-0 border-b border-[#e5e9f0] dark:border-[#252b35] px-6 py-4 flex items-center justify-between">
-        <h1 className="text-[20px] font-semibold text-[#111827] dark:text-[#f3f4f6] tracking-[-0.4px]">
-          Your Module
-        </h1>
-        <Button size="sm">Primary action</Button>
-      </div>
-      {/* Content */}
-      <div className="flex-1 overflow-auto p-6">
-        {/* Use components from src/app/components/ui/ here */}
-      </div>
-    </div>
-  );
+**useLayoutEffect highlight** — add:
+```ts
+else if (currentView === "inventory") setActiveIcon("Inventory");
+```
+
+**L2 nav panel** — copy an existing panel config and create:
+```ts
+const inventoryConfig = {
+  sections: [
+    { label: "Actions",  children: ["Stock levels", "Reorder alerts"] },
+    { label: "Reports",  children: ["Overview", "Trends"] },
+    { label: "Settings", children: ["Locations", "Suppliers"] },
+  ],
+};
+
+export function InventoryL2NavPanel() {
+  return <L2NavLayout {...inventoryConfig} data-no-print />;
 }
 ```
 
-Wire in `App.tsx` in the main content render chain:
+### Step 5 — Wire view and L2 panel in App.tsx
+
+**Import the L2 panel** at the top:
+```ts
+import { ..., InventoryL2NavPanel } from "./components/Sidebar";
+```
+
+**Add to `hasOwnL2Panel`:**
+```ts
+v === "inventory" ||
+```
+
+**Render the L2 panel** (near the other L2 panel blocks):
 ```tsx
-} : currentView === "your-module-name" ? (
-  <YourModuleView />
-) : ...
+{!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "inventory" && (
+  <InventoryL2NavPanel />
+)}
 ```
 
-## Styling rules
-
-- **Colors**: Use Tailwind token classes only — `bg-white`, `text-[#111827]`, `border-[#e5e9f0]`, `dark:bg-[#1e2229]`
-- **Never** use arbitrary hex in `style={{ color: '#...' }}` inline styles
-- **Spacing**: Multiples of 4px — `p-4`, `gap-2`, `px-6`, `py-3`
-- **Font**: Already loaded via `src/tokens/fonts.css` — do not import fonts manually
-- **Icons**: Import from `lucide-react` or `@phosphor-icons/react` only
-
-## ALWAYS start from the template
-
-When building any new feature module, **always copy `TemplateModuleView.tsx` first**:
-
-```bash
-cp src/app/components/TemplateModuleView.tsx src/app/components/YourFeatureView.tsx
+**Import and render the view:**
+```ts
+import { InventoryView } from "./components/InventoryView";
+```
+```tsx
+} : currentView === "inventory" ? (
+  <InventoryView />
+) : (
 ```
 
-The template already has:
-- `ModuleHeader` wired up with title, subtitle, and action buttons
-- A search input
-- A data table with status badges and row actions
-- Correct Tailwind token classes (no raw hex)
-- Inline comments explaining every section
+---
 
-Rename "Template" → "YourFeature" throughout, then replace mock data with real data.
+## L2 navigation → content routing (THE NEW PATTERN)
+
+Every module view receives the active L2 item automatically via `useActiveL2Item()`.
+This is provided by `L2NavBridgeContext` — already wired in `App.tsx`. You do not need to touch App.tsx to get L2 routing working inside your view.
+
+### Pattern:
+
+```tsx
+import { useActiveL2Item } from "@/app/context/L2NavBridgeContext";
+import { ModuleEmptyState } from "@/app/components/layout/ModuleEmptyState";
+
+export function InventoryView() {
+  const activeItem = useActiveL2Item();
+  // activeItem format: "SectionLabel/ItemLabel"  e.g. "Actions/Stock levels"
+  //                    "standalone/ItemLabel"     e.g. "standalone/All contacts"
+  //                    ""                         (nothing clicked yet)
+
+  // Route each L2 item to real content:
+  if (activeItem === "Actions/Stock levels")   return <StockLevelsContent />;
+  if (activeItem === "Actions/Reorder alerts") return <ReorderAlertsContent />;
+
+  // Everything else → intentional empty state (never blank):
+  return <ModuleEmptyState moduleName="Inventory" activeL2Key={activeItem} />;
+}
+```
+
+### Why this guarantees no blank screens:
+- Every unbuilt section falls through to `ModuleEmptyState` automatically
+- `ModuleEmptyState` shows the section name + build instructions
+- As you add real content components, they take over naturally
+
+---
 
 ## Shared layout components
 
 ```
-src/app/components/layout/ModuleHeader.tsx  ← use for ALL page headers
+src/app/components/layout/ModuleHeader.tsx      ← page header for all modules
+src/app/components/layout/ModuleEmptyState.tsx  ← intentional empty state
 ```
 
 ```tsx
 import { ModuleHeader } from "@/app/components/layout/ModuleHeader";
+import { ModuleEmptyState } from "@/app/components/layout/ModuleEmptyState";
 
 <ModuleHeader
-  title="Your Module"
+  title="Inventory"
   subtitle="Optional description"
-  actions={<Button size="sm">Primary action</Button>}
-  tabs={<Tabs>...</Tabs>}
+  actions={<Button size="sm">Add item</Button>}
+/>
+
+<ModuleEmptyState
+  moduleName="Inventory"
+  activeL2Key={activeItem}   // from useActiveL2Item()
 />
 ```
 
-## Reference: look at existing modules before building
+---
 
-The best way to understand patterns is to read existing views:
-- **Template (start here)** → `src/app/components/TemplateModuleView.tsx`
-- Simple list view → `src/app/components/ReviewsView.v1.tsx`
-- Data table view → `src/app/components/ContactsView.v1.tsx`
-- Dashboard with charts → `src/app/components/BusinessOverviewDashboard.tsx`
-- Form-heavy view → `src/app/components/ScheduleBuilderView.tsx`
+## Reference modules to read before building
+
+| What you're building | Best reference |
+|---------------------|---------------|
+| Any new module      | `TemplateModuleView.tsx` ← start here |
+| Simple list view    | `ReviewsView.v1.tsx` |
+| Data table view     | `ContactsView.v1.tsx` |
+| Dashboard + charts  | `BusinessOverviewDashboard.tsx` |
+| Form-heavy view     | `ScheduleBuilderView.tsx` |
+
+---
+
+## Styling rules
+
+- **Colors**: Tailwind token classes only — `bg-white`, `text-[#111827]`, `border-[#e5e9f0]`, `dark:bg-[#1e2229]`
+- **Never** use `style={{ color: '#...' }}` inline hex
+- **Spacing**: Multiples of 4px — `p-4`, `gap-2`, `px-6`, `py-3`
+- **Font**: Already loaded via `src/tokens/fonts.css` — do not import fonts manually
+- **Icons**: Import from `lucide-react` or `@phosphor-icons/react` only
+
+---
 
 ## Common mistakes that cause blank screens
 
-1. **Not importing the component** — double-check the import path uses `@/app/components/ui/`
-2. **Not wiring the view in App.tsx** — the `currentView === "your-module"` branch must exist
-3. **CSS class typo** — Tailwind classes are case-sensitive
-4. **Returning null accidentally** — make sure your component always returns JSX
-5. **Missing export** — ensure `export function YourModuleView()` not just `function YourModuleView()`
+1. **Forgot to add render case in App.tsx** — the `currentView === "your-module"` branch must exist
+2. **Forgot to add to `hasOwnL2Panel`** — the L2 panel won't render without this
+3. **Forgot to import the component** — double-check the import path uses `@/app/components/`
+4. **Using `style={}` instead of Tailwind** — classes are case-sensitive
+5. **Missing export** — use `export function YourView()` not `function YourView()`
 
-> If you add a route but forget to wire the view, the app now shows a helpful
-> `UnwiredModuleView` with exact instructions instead of a blank screen.
+> Any route in AppView that isn't wired up shows `UnwiredModuleView` with exact fix instructions.
+
+---
 
 ## Design version
 
