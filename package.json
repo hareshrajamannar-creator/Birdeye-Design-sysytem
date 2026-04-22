@@ -1,7 +1,7 @@
 {
-  "name": "@balajik-cmyk/aero-ds",
+  "name": "birdeye-design-system",
   "version": "1.0.0",
-  "description": "Aero Design System — UI component library and Storybook for BirdAI",
+  "description": "Birdeye Design System — internal team base for building product features",
   "type": "module",
   "scripts": {
     "dev": "vite",

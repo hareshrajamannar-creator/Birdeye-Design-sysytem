@@ -1,70 +1,128 @@
-# Aero DS
+# Birdeye Design System
 
-Aero DS is the design system and component library powering BirdAI. It contains all UI components, design tokens, theme definitions, and Storybook stories.
+The internal team base for building Birdeye product features. Clone it, run it, and build your feature on top — everything you need is already here.
 
-## What's inside
-
-- `src/app/components/ui/` — Primitive UI components (Button, Input, Card, Dialog, etc.)
-- `src/app/components/` — Composed app-level components
-- `src/tokens/` — Global CSS styles and Tailwind base
-- `src/themes/` — Design token CSS files per theme version (v1–v4)
-- `src/stories/` — Storybook stories for all components
-- `.storybook/` — Storybook configuration
-
-## Getting started
-
-### 1. Clone the repo
+## Quick start
 
 ```bash
-git clone https://github.com/balajik-cmyk/aero-ds.git
-cd aero-ds
-```
-
-SSH (when your GitHub SSH config uses a host alias for this account, e.g. `github-balajik`):
-
-```bash
-git clone git@github-balajik:balajik-cmyk/aero-ds.git
-cd aero-ds
-```
-
-### 2. Install dependencies
-
-```bash
+git clone https://github.com/hareshrajamannar-creator/Birdeye-Design-sysytem.git
+cd Birdeye-Design-sysytem
 npm install
+npm run dev        # → http://localhost:5173  (full product shell)
+npm run storybook  # → http://localhost:6006  (component browser)
 ```
 
-### 3. Run Storybook
+## Building a new feature
+
+### 1. Create your branch
 
 ```bash
-npm run storybook
+git checkout -b feature/your-feature-name
 ```
 
-Storybook will start at [http://localhost:6006](http://localhost:6006).
-
-### Design workflow (AI / agents)
-
-The **Aero DS** project skill tells Cursor and Claude Code to use **Storybook** and **token CSS** as sources of truth—not generic CSV palettes. See **[`.claude/skills/aero-ds/SKILL.md`](.claude/skills/aero-ds/SKILL.md)** (full guide: **How it works**, **Compatibility**, guardrails). If your tool only scans `.cursor/skills/`, open **[`.cursor/skills/aero-ds/SKILL.md`](.cursor/skills/aero-ds/SKILL.md)**—it points to the same content.
-
-### 4. Build Storybook (static)
+### 2. Copy the template module
 
 ```bash
-npm run build-storybook
+cp src/app/components/TemplateModuleView.tsx src/app/components/YourFeatureView.tsx
 ```
 
-### 5. Build the published package (TypeScript)
+Open the new file — every step is annotated inside it.
 
-Emits `dist/` for the npm entry (`cn` helper and `package.json` `exports`). This is a narrow build and does not typecheck the full Storybook tree.
+### 3. Wire it up (5 steps)
+
+| Step | File | What to do |
+|------|------|-----------|
+| 1 | `src/app/App.tsx` | Add `"your-feature"` to the `AppView` union type |
+| 2 | `src/app/appViewTitle.ts` | Add `case "your-feature": return "Your Feature";` |
+| 3 | `src/app/components/Sidebar.v2.tsx` | Add your L1 icon entry |
+| 4 | `src/app/components/YourFeatureL2NavPanel.tsx` | Create L2 nav panel (if needed) |
+| 5 | `src/app/App.tsx` | Add render case + import your view |
+
+Full walkthrough: see `AERO_DS_APP_PLAN.md`.
+
+### 4. Open your PR
 
 ```bash
-npm run build
+git push origin feature/your-feature-name
+# Open a PR against main on GitHub
 ```
 
-## Publishing
+## The one rule
 
-This package is published to the GitHub Package Registry under the `@balajik-cmyk` scope.
+**Every UI element must come from `src/app/components/ui/`.**
 
-```bash
-npm publish
+```
+Button       → src/app/components/ui/button.tsx
+Card         → src/app/components/ui/card.tsx
+Table        → src/app/components/ui/table.tsx
+Input        → src/app/components/ui/input.tsx
+Dialog       → src/app/components/ui/dialog.tsx
+Badge        → src/app/components/ui/badge.tsx
+Select       → src/app/components/ui/select.tsx
+Tabs         → src/app/components/ui/tabs.tsx
+Sheet        → src/app/components/ui/sheet.tsx
+Checkbox     → src/app/components/ui/checkbox.tsx
+Switch       → src/app/components/ui/switch.tsx
+Dropdown     → src/app/components/ui/dropdown-menu.tsx
+Avatar       → src/app/components/ui/avatar.tsx
+Skeleton     → src/app/components/ui/skeleton.tsx
+Chart        → src/app/components/ui/chart.tsx
+Form         → src/app/components/ui/form.tsx
 ```
 
-Requires a valid `NODE_AUTH_TOKEN` with `write:packages` permission set in your environment.
+Never install a new UI library. Never write a component from scratch if it exists above.
+
+## Using with Claude Code / Cursor / VS Code + AI
+
+This repo includes a `CLAUDE.md` file that automatically gives Claude Code full context about the project structure, component rules, and wiring instructions. When you open this repo in Claude Code and ask it to build a feature, it will:
+
+- Use the correct components from `src/app/components/ui/`
+- Follow the 5-step module wiring pattern
+- Use the `TemplateModuleView.tsx` as the starting point
+- Never invent new styles or install new packages
+
+**Recommended workflow:**
+```
+1. git checkout -b feature/your-feature
+2. Open repo in Cursor or run `claude` in terminal
+3. Ask: "Build a [your feature] module using the template"
+4. Review the output, make tweaks, push PR
+```
+
+## Project structure
+
+```
+src/
+├── app/
+│   ├── App.tsx                          ← Route registry + shell wiring
+│   ├── appViewTitle.ts                  ← Module title map
+│   ├── components/
+│   │   ├── ui/                          ← ALL UI primitives — use these
+│   │   ├── layout/
+│   │   │   ├── ModuleHeader.tsx         ← Shared page header for all modules
+│   │   │   └── ...
+│   │   ├── TemplateModuleView.tsx       ← Copy this to start a new feature
+│   │   ├── Sidebar.tsx                  ← L1 strip + all L2 panel exports
+│   │   ├── TopBar.tsx                   ← Top bar (don't edit)
+│   │   ├── ReviewsView.tsx              ← Reference: simple list view
+│   │   ├── ContactsView.tsx             ← Reference: data table view
+│   │   ├── BusinessOverviewDashboard.tsx← Reference: charts + dashboard
+│   │   └── ...                          ← All other module views
+│   └── hooks/
+├── stories/                             ← Storybook stories for all components
+├── themes/                              ← Design tokens (v1–v4)
+└── tokens/                              ← Base CSS (fonts, tailwind, theme)
+```
+
+## Scripts
+
+| Command | What it does |
+|---------|-------------|
+| `npm run dev` | Start the app at localhost:5173 |
+| `npm run build:app` | Production build of the app |
+| `npm run storybook` | Browse all components at localhost:6006 |
+| `npm run typecheck` | TypeScript check with no emit |
+
+## Questions?
+
+Ping the design systems team or refer to `AERO_DS_APP_PLAN.md` for the full technical plan.

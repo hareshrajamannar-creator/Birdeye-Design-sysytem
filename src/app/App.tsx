@@ -61,6 +61,8 @@ import { ConversationStream } from "./components/ConversationStream";
 import { BirdAILoginPage } from "./components/auth/BirdAILoginPage";
 import { AppBootShimmer } from "./components/layout/AppBootShimmer";
 import { SEARCH_AI_L2_DEFAULT_ACTIVE } from "./components/searchai/searchAIL2Keys";
+import { UnwiredModuleView } from "./components/UnwiredModuleView";
+import { BirdeyeAssistView } from "./components/BirdeyeAssistView";
 
 const AUTH_STORAGE_KEY = "birdai_demo_authenticated";
 const LOGIN_TAB_TITLE_INDEX_KEY = "auth:login_tab_title_index";
@@ -105,7 +107,8 @@ export type AppView =
   | "referrals"
   | "payments"
   | "appointments"
-  | "conversation-stream";
+  | "conversation-stream"
+  | "birdeye-assist";
 
 /** Brief shell shimmer after login so the first paint mirrors real app loading. */
 const POST_LOGIN_BOOT_MS = 1200;
@@ -118,7 +121,7 @@ export default function App() {
     try {
       sessionStorage.setItem(AUTH_STORAGE_KEY, "true");
       // Always land on Reviews after login
-      sessionStorage.setItem("nav:l1", JSON.stringify("reviews"));
+      sessionStorage.setItem("nav:l1:v2", JSON.stringify("business-overview"));
     } catch {
       /* ignore */
     }
@@ -151,7 +154,7 @@ export default function App() {
   }, []);
 
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
-  const [currentView, setCurrentView] = usePersistedState<AppView>("nav:l1", "reviews");
+  const [currentView, setCurrentView] = usePersistedState<AppView>("nav:l1:v2", "business-overview");
   const [editingDraft, setEditingDraft] = useState<DraftReport | null>(null);
   const [selectedAgentSlug, setSelectedAgentSlug] = usePersistedState<string>("nav:l2:agents", "");
   const [selectedAnalyzeItem, setSelectedAnalyzeItem] = usePersistedState<string>("nav:l2:agents:analyze", "overview");
@@ -586,12 +589,12 @@ export default function App() {
               <AppointmentsView />
             ) : currentView === "conversation-stream" ? (
               <ConversationStream />
+            ) : currentView === "birdeye-assist" ? (
+              <BirdeyeAssistView />
             ) : (
-              <Dashboard
-                aiPanelOpen={aiPanelOpen}
-                onAiPanelChange={handleAiPanelChange}
-                editingDraft={editingDraft}
-              />
+              // Any route added to AppView but not yet wired up shows a
+              // helpful placeholder instead of a blank screen.
+              <UnwiredModuleView currentView={currentView} />
             )}
             </div>
             ) : null}
