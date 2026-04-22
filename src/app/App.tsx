@@ -119,7 +119,7 @@ export default function App() {
     try {
       sessionStorage.setItem(AUTH_STORAGE_KEY, "true");
       // Always land on Reviews after login
-      sessionStorage.setItem("nav:l1", JSON.stringify("business-overview"));
+      sessionStorage.setItem("nav:l1:v2", JSON.stringify("business-overview"));
     } catch {
       /* ignore */
     }
@@ -152,7 +152,7 @@ export default function App() {
   }, []);
 
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
-  const [currentView, setCurrentView] = usePersistedState<AppView>("nav:l1", "business-overview");
+  const [currentView, setCurrentView] = usePersistedState<AppView>("nav:l1:v2", "business-overview");
   const [editingDraft, setEditingDraft] = useState<DraftReport | null>(null);
   const [selectedAgentSlug, setSelectedAgentSlug] = usePersistedState<string>("nav:l2:agents", "");
   const [selectedAnalyzeItem, setSelectedAnalyzeItem] = usePersistedState<string>("nav:l2:agents:analyze", "overview");
