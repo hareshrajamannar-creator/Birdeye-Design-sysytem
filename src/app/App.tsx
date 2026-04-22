@@ -73,13 +73,8 @@ function parseStoredLoginTabIndex(raw: string | null): number {
 }
 
 function readDemoAuthenticated(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    // Opt-in: missing key (fresh tab / new deployment) = not authenticated
-    return sessionStorage.getItem(AUTH_STORAGE_KEY) === "true";
-  } catch {
-    return false;
-  }
+  // Skip login — always start authenticated for local dev
+  return true;
 }
 
 export type AppView =
