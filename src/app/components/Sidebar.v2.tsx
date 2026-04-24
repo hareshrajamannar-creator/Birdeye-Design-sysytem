@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useLayoutEffect, useMemo, useCallback } from "react";
 import {
-  ChevronDown, ChevronUp, Settings, User, LogOut, Camera, Moon, Sun, Monitor, ChevronLeft, Share2, Clock, ExternalLink, Keyboard, Sparkles,
+  ChevronDown, ChevronUp, Settings, User, LogOut, Camera, Moon, Sun, Monitor, ChevronLeft, Share2, Clock, ExternalLink, Keyboard, Sparkles, LifeBuoy, Menu,
 } from "lucide-react";
 import {
   House, ChatDots, MapPin, Star, Gift, CurrencyDollar,
   CalendarDots, Graph, ClipboardText, Ticket, Users,
   MegaphoneSimple, Globe, Lightbulb, ChartBar, Sparkle,
+  Terminal, CaretRight, Briefcase, Database, LinkSimple, Shield,
 } from "@phosphor-icons/react";
 import svgPaths from "../../imports/svg-y1gexucine";
 import type { AppView } from "../App";
@@ -100,6 +101,7 @@ export function IconStrip({ currentView, onViewChange, iconSize = L1_STRIP_ICON_
     else if (currentView === "competitors") setActiveIcon("Competitors");
     else if (currentView === "dashboard" || currentView === "shared-by-me") setActiveIcon("Reports");
     else if (currentView === "agents-monitor" || currentView === "agents-analyze-performance" || currentView === "agents-builder" || currentView === "agent-detail" || currentView === "agents-onboarding" || currentView === "birdai-reports") setActiveIcon("Agents");
+    else if (currentView === "birdeye-assist") setActiveIcon("");
     // scheduled-deliveries / schedule-builder: no icon mapping
   }, [currentView]);
 
@@ -205,6 +207,30 @@ export function IconStrip({ currentView, onViewChange, iconSize = L1_STRIP_ICON_
             strokeWidth={L1_STRIP_ICON_STROKE_PX}
             className={`transition-all duration-200 ${
               currentView === "agents-onboarding"
+                ? "text-[#1E44CC] dark:text-[#2952E3]"
+                : "text-[#505050] dark:text-[#9ba2b0] group-hover:text-[#1E44CC] dark:group-hover:text-[#2952E3] group-hover:scale-110"
+            }`}
+          />
+        </button>
+
+        {/* Birdeye Assist */}
+        <button
+          type="button"
+          onClick={() => onViewChange("birdeye-assist")}
+          className={`group relative w-[32px] h-[32px] flex items-center justify-center rounded-[10px] shrink-0 transition-all duration-200 ease-out outline-none focus-visible:ring-2 focus-visible:ring-[#1E44CC]/50 focus-visible:ring-offset-1 focus-visible:ring-offset-[#e0e5eb] dark:focus-visible:ring-offset-[#181b22] ${
+            currentView === "birdeye-assist"
+              ? "bg-[#d4dae3] dark:bg-[#282e3a] shadow-none"
+              : "bg-transparent hover:bg-[#d4dae3] dark:hover:bg-[#282e3a] active:bg-[#c8d0dc] dark:active:bg-[#313845] hover:scale-110 active:scale-95"
+          }`}
+          title="Birdeye Assist"
+          aria-label="Birdeye Assist"
+        >
+          <LifeBuoy
+            width={L1_STRIP_ICON_SIZE}
+            height={L1_STRIP_ICON_SIZE}
+            strokeWidth={L1_STRIP_ICON_STROKE_PX}
+            className={`transition-all duration-200 ${
+              currentView === "birdeye-assist"
                 ? "text-[#1E44CC] dark:text-[#2952E3]"
                 : "text-[#505050] dark:text-[#9ba2b0] group-hover:text-[#1E44CC] dark:group-hover:text-[#2952E3] group-hover:scale-110"
             }`}
@@ -998,6 +1024,100 @@ const appointmentsConfig = {
 
 export function AppointmentsL2NavPanel() {
   return <L2NavLayout {...appointmentsConfig} data-no-print />;
+}
+
+/* ═══════════════════════════════════════════
+   Birdeye Assist L2 Nav Panel — custom dark panel
+   ═══════════════════════════════════════════ */
+
+const ASSIST_APPS: { label: string; Icon: React.ElementType }[] = [
+  { label: "Doc Explorer", Icon: ClipboardText },
+  { label: "Redash",       Icon: ChartBar      },
+  { label: "PAL Console",  Icon: Terminal       },
+];
+
+const ASSIST_SERVICES: { label: string; Icon: React.ElementType; sub: boolean }[] = [
+  { label: "Account",      Icon: Users,          sub: false },
+  { label: "AgentArc",     Icon: Sparkle,        sub: true  },
+  { label: "Aggregation",  Icon: Graph,          sub: true  },
+  { label: "Appointment",  Icon: CalendarDots,   sub: true  },
+  { label: "Armor",        Icon: Shield,         sub: true  },
+  { label: "BizApps",      Icon: Briefcase,      sub: true  },
+  { label: "Campaign",     Icon: MegaphoneSimple,sub: true  },
+  { label: "Competitors",  Icon: Globe,          sub: true  },
+  { label: "Doup",         Icon: Database,       sub: true  },
+  { label: "Inbox",        Icon: ChatDots,       sub: true  },
+  { label: "Integrations", Icon: LinkSimple,     sub: true  },
+  { label: "Listings",     Icon: MapPin,         sub: true  },
+  { label: "Nexus",        Icon: Lightbulb,      sub: true  },
+  { label: "NLP",          Icon: Star,           sub: true  },
+  { label: "Reviews",      Icon: Star,           sub: true  },
+];
+
+export function BirdeyeAssistL2NavPanel() {
+  const [activeService, setActiveService] = useState("Account");
+
+  return (
+    <div
+      className="w-[220px] bg-[#1a2535] flex flex-col h-full overflow-hidden shrink-0 rounded-tl-lg"
+      data-no-print
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-[13px] shrink-0">
+        <span className="text-white font-semibold text-[14px] tracking-[-0.2px]">Birdeye Assist</span>
+        <button className="text-[#6a84a0] hover:text-white transition-colors p-0.5">
+          <Menu width={16} height={16} />
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-2 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* APPS section */}
+        <p className="px-2 pt-1 pb-[6px] text-[10.5px] text-[#6a84a0] uppercase tracking-widest font-semibold">
+          Apps
+        </p>
+        {ASSIST_APPS.map(({ label, Icon }) => (
+          <button
+            key={label}
+            className="flex items-center gap-2.5 w-full px-2 py-[7px] text-[13px] text-[#adbdd0] hover:bg-white/[0.07] rounded-[5px] transition-colors text-left"
+          >
+            <Icon size={15} className="shrink-0 text-[#6a84a0]" />
+            <span>{label}</span>
+          </button>
+        ))}
+
+        {/* SERVICES section */}
+        <p className="px-2 pt-3 pb-[6px] text-[10.5px] text-[#6a84a0] uppercase tracking-widest font-semibold">
+          Services
+        </p>
+        {ASSIST_SERVICES.map(({ label, Icon, sub }) => {
+          const isActive = activeService === label;
+          return (
+            <button
+              key={label}
+              onClick={() => setActiveService(label)}
+              className={`flex items-center gap-2.5 w-full px-2 py-[7px] text-[13px] rounded-[5px] transition-colors text-left ${
+                isActive
+                  ? "bg-white/[0.12] text-white"
+                  : "text-[#adbdd0] hover:bg-white/[0.07]"
+              }`}
+            >
+              <Icon
+                size={15}
+                className={`shrink-0 ${isActive ? "text-[#7aaee8]" : "text-[#6a84a0]"}`}
+              />
+              <span className="flex-1">{label}</span>
+              {sub && (
+                <CaretRight
+                  size={12}
+                  className="shrink-0 text-[#405570]"
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 /* ═══════════════════════════════════════════

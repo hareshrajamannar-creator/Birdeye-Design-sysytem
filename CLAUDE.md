@@ -17,6 +17,35 @@ A fully working Birdeye product shell your team uses as a base to build features
 - **25+ reference module views** (Reviews, Contacts, Agents, Social, etc.) — `src/app/components/`
 - **All UI primitives** — `src/app/components/ui/` (Button, Card, Table, Input, Dialog, etc.)
 
+## NON-NEGOTIABLE RULES — read before writing a single line
+
+### 1. Reference images are for structure only — NEVER copy their styling
+If a user provides a screenshot or design image:
+- **Use it only** to understand layout structure, sections, and data fields.
+- **Never replicate** colors, fonts, spacing, borders, shadows, navigation styles, or any visual treatment shown in the image.
+- **Always apply** this design system's tokens, components, and patterns instead.
+- A reference image showing a blue sidebar, custom nav, or half-width card is **describing intent** — not dictating implementation.
+
+### 2. Never touch the chrome — L1, L2, and TopBar are frozen
+- **L1 navigation** (`Sidebar.v2.tsx` → `iconStripItems`, click handlers, `useLayoutEffect`) — **do not modify**.
+- **L2 navigation panels** (all `*L2NavPanel` exports in `Sidebar.v2.tsx`) — **do not modify**.
+- **TopBar** (`TopBar.tsx`) — **do not modify**.
+These are shared infrastructure. Your work lives entirely inside the module view component.
+
+### 3. Content must always be full-width
+- Your module view receives 100% of the available content area.
+- **Never** render content in a half-width, centered-column, or constrained-width layout unless the user explicitly asks for it.
+- Correct: `<div className="flex flex-col flex-1 min-h-0">` — fills the area.
+- Wrong: `<div className="max-w-2xl mx-auto">` — shrinks to a column.
+
+### 4. Check Storybook before writing any component
+Run `npm run storybook` (→ http://localhost:6006) and search before building.
+- If a component exists there → **import and use it**. Do not recreate it.
+- If it doesn't exist → build it from the primitives in `src/app/components/ui/`.
+- **Never** install a new UI library or write raw HTML elements when a system component exists.
+
+---
+
 ## THE ONE RULE — read before writing any UI
 
 **Every UI element must come from `src/app/components/ui/`.**
