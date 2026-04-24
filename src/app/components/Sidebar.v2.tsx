@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect, useMemo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   ChevronDown, ChevronUp, Settings, User, LogOut, Camera, Moon, Sun, Monitor, ChevronLeft, Share2, Clock, ExternalLink, Keyboard, Sparkles, LifeBuoy, Menu,
 } from "lucide-react";
@@ -74,8 +75,6 @@ export function IconStrip({ currentView, onViewChange, iconSize = L1_STRIP_ICON_
     setTooltip({ label, top: rect.top + rect.height / 2 });
   };
   const hideTooltip = () => setTooltip(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  void showTooltip; void hideTooltip; void tooltip;
   const [showAppearance, setShowAppearance] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -145,7 +144,10 @@ export function IconStrip({ currentView, onViewChange, iconSize = L1_STRIP_ICON_
           return (
             <button
               key={label}
+              onMouseEnter={(e) => showTooltip(e, label)}
+              onMouseLeave={hideTooltip}
               onClick={() => {
+                hideTooltip();
                 setActiveIcon(label);
                 if (label === "Home") onViewChange("business-overview");
                 else if (label === "Inbox") onViewChange("inbox");
@@ -192,13 +194,14 @@ export function IconStrip({ currentView, onViewChange, iconSize = L1_STRIP_ICON_
         {/* Agent setup — from main L1 tower */}
         <button
           type="button"
-          onClick={() => onViewChange("agents-onboarding")}
+          onMouseEnter={(e) => showTooltip(e, "Agent setup")}
+          onMouseLeave={hideTooltip}
+          onClick={() => { hideTooltip(); onViewChange("agents-onboarding"); }}
           className={`group relative w-[32px] h-[32px] flex items-center justify-center rounded-[10px] shrink-0 transition-all duration-200 ease-out outline-none focus-visible:ring-2 focus-visible:ring-[#1E44CC]/50 focus-visible:ring-offset-1 focus-visible:ring-offset-[#e0e5eb] dark:focus-visible:ring-offset-[#181b22] ${
             currentView === "agents-onboarding"
               ? "bg-[#d4dae3] dark:bg-[#282e3a] shadow-none"
               : "bg-transparent hover:bg-[#d4dae3] dark:hover:bg-[#282e3a] active:bg-[#c8d0dc] dark:active:bg-[#313845] hover:scale-110 active:scale-95"
           }`}
-          title="Agent setup"
           aria-label="Agent setup"
         >
           <Sparkles
@@ -216,13 +219,14 @@ export function IconStrip({ currentView, onViewChange, iconSize = L1_STRIP_ICON_
         {/* Birdeye Assist */}
         <button
           type="button"
-          onClick={() => onViewChange("birdeye-assist")}
+          onMouseEnter={(e) => showTooltip(e, "Birdeye Assist")}
+          onMouseLeave={hideTooltip}
+          onClick={() => { hideTooltip(); onViewChange("birdeye-assist"); }}
           className={`group relative w-[32px] h-[32px] flex items-center justify-center rounded-[10px] shrink-0 transition-all duration-200 ease-out outline-none focus-visible:ring-2 focus-visible:ring-[#1E44CC]/50 focus-visible:ring-offset-1 focus-visible:ring-offset-[#e0e5eb] dark:focus-visible:ring-offset-[#181b22] ${
             currentView === "birdeye-assist"
               ? "bg-[#d4dae3] dark:bg-[#282e3a] shadow-none"
               : "bg-transparent hover:bg-[#d4dae3] dark:hover:bg-[#282e3a] active:bg-[#c8d0dc] dark:active:bg-[#313845] hover:scale-110 active:scale-95"
           }`}
-          title="Birdeye Assist"
           aria-label="Birdeye Assist"
         >
           <LifeBuoy
@@ -240,7 +244,11 @@ export function IconStrip({ currentView, onViewChange, iconSize = L1_STRIP_ICON_
         {/* Settings gear — same surface / hover / focus as L1 nav icons */}
         <button
           type="button"
+          onMouseEnter={(e) => showTooltip(e, "Settings")}
+          onMouseLeave={hideTooltip}
+          onClick={hideTooltip}
           className="group relative w-[32px] h-[32px] flex items-center justify-center rounded-[10px] shrink-0 transition-all duration-200 ease-out outline-none bg-transparent hover:bg-[#d4dae3] dark:hover:bg-[#282e3a] active:bg-[#c8d0dc] dark:active:bg-[#313845] hover:scale-110 active:scale-95 focus-visible:ring-2 focus-visible:ring-[#1E44CC]/50 focus-visible:ring-offset-1 focus-visible:ring-offset-[#e0e5eb] dark:focus-visible:ring-offset-[#181b22]"
+          aria-label="Settings"
         >
           <Settings
             width={L1_STRIP_ICON_SIZE}
@@ -458,7 +466,31 @@ export function IconStrip({ currentView, onViewChange, iconSize = L1_STRIP_ICON_
         </div>
       </div>
 
-
+      {/* L1 tooltip portal — renders at document.body so it escapes overflow-y:auto clipping */}
+      {tooltip && createPortal(
+        <div
+          className="fixed z-[9999] pointer-events-none"
+          style={{ top: tooltip.top, left: 74, transform: "translateY(-50%)" }}
+        >
+          <div className="relative flex items-center">
+            {/* Left-pointing caret */}
+            <span
+              className="absolute -left-[6px]"
+              style={{
+                width: 0,
+                height: 0,
+                borderTop: "5px solid transparent",
+                borderBottom: "5px solid transparent",
+                borderRight: "6px solid #111827",
+              }}
+            />
+            <span className="bg-[#111827] dark:bg-[#0d1117] text-white text-[12px] font-medium px-[10px] py-[5px] rounded-[6px] shadow-[0_2px_8px_rgba(0,0,0,0.28)] whitespace-nowrap leading-none">
+              {tooltip.label}
+            </span>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
