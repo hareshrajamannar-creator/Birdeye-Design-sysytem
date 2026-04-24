@@ -98,6 +98,9 @@ export function IconStrip({ currentView, onViewChange, iconSize = L1_STRIP_ICON_
     else if (currentView === "campaigns") setActiveIcon("Campaigns");
     else if (currentView === "insights") setActiveIcon("Insights");
     else if (currentView === "competitors") setActiveIcon("Competitors");
+    else if (currentView === "referrals") setActiveIcon("Referrals");
+    else if (currentView === "payments") setActiveIcon("Payments");
+    else if (currentView === "appointments") setActiveIcon("Appointments");
     else if (currentView === "dashboard" || currentView === "shared-by-me") setActiveIcon("Reports");
     else if (currentView === "agents-monitor" || currentView === "agents-analyze-performance" || currentView === "agents-builder" || currentView === "agent-detail" || currentView === "agents-onboarding" || currentView === "birdai-reports") setActiveIcon("Agents");
     else if (currentView === "birdeye-assist") setActiveIcon("");
@@ -162,6 +165,9 @@ export function IconStrip({ currentView, onViewChange, iconSize = L1_STRIP_ICON_
                 else if (label === "Ticketing") onViewChange("ticketing");
                 else if (label === "Campaigns") onViewChange("campaigns");
                 else if (label === "Competitors") onViewChange("competitors");
+                else if (label === "Referrals") onViewChange("referrals");
+                else if (label === "Payments") onViewChange("payments");
+                else if (label === "Appointments") onViewChange("appointments");
               }}
               className={`
                 group relative w-[32px] h-[32px] flex items-center justify-center rounded-[10px] shrink-0
@@ -1044,14 +1050,35 @@ export { AgentsL2NavPanel } from "./AgentsL2NavPanel";
 export { MynaConversationsL2NavPanel } from "./MynaConversationsL2NavPanel";
 
 /* ═══════════════════════════════════════════
+   Referrals L2 Nav Panel
+   ═══════════════════════════════════════════ */
+const referralsConfig = {
+  standaloneItems: ["Referrals"],
+  sections: [],
+};
+
+export function ReferralsL2NavPanel() {
+  return <L2NavLayout {...referralsConfig} data-no-print />;
+}
+
+/* ═══════════════════════════════════════════
+   Payments L2 Nav Panel
+   ═══════════════════════════════════════════ */
+const paymentsConfig = {
+  standaloneItems: ["Payments"],
+  sections: [],
+};
+
+export function PaymentsL2NavPanel() {
+  return <L2NavLayout {...paymentsConfig} data-no-print />;
+}
+
+/* ═══════════════════════════════════════════
    Appointments L2 Nav Panel
    ═══════════════════════════════════════════ */
 const appointmentsConfig = {
-  sections: [
-    { label: "Overview", children: ["Calendar", "Upcoming", "Waitlist"] },
-    { label: "Manage", children: ["Services", "Staff", "Locations"] },
-    { label: "Settings", children: ["Notifications", "Integrations"] },
-  ],
+  standaloneItems: ["Appointments"],
+  sections: [],
 };
 
 export function AppointmentsL2NavPanel() {

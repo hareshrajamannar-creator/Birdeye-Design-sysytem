@@ -2,7 +2,8 @@ import {
   IconStrip, L2NavPanel, ReviewsL2NavPanel, SocialL2NavPanel, SearchAIL2NavPanel,
   ContactsL2NavPanel, AgentsL2NavPanel, ListingsL2NavPanel, TicketingL2NavPanel,
   CampaignsL2NavPanel, SurveysL2NavPanel, InsightsL2NavPanel, CompetitorsL2NavPanel,
-  AppointmentsL2NavPanel, InboxL2NavPanel, MynaConversationsL2NavPanel,
+  ReferralsL2NavPanel, PaymentsL2NavPanel, AppointmentsL2NavPanel, InboxL2NavPanel, MynaConversationsL2NavPanel,
+  BirdeyeAssistL2NavPanel,
 } from "./components/Sidebar";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { usePersistedState } from "./hooks/usePersistedState";
@@ -58,6 +59,7 @@ import { useMynaConversations } from "./myna/useMynaConversations";
 import { ShortcutsModal } from "./shortcuts/ShortcutsModal";
 import { useShortcuts } from "./shortcuts/useShortcuts";
 import { ConversationStream } from "./components/ConversationStream";
+import { BirdeyeAssistView } from "./components/BirdeyeAssistView";
 import { BirdAILoginPage } from "./components/auth/BirdAILoginPage";
 import { AppBootShimmer } from "./components/layout/AppBootShimmer";
 import { SEARCH_AI_L2_DEFAULT_ACTIVE } from "./components/searchai/searchAIL2Keys";
@@ -107,7 +109,8 @@ export type AppView =
   | "referrals"
   | "payments"
   | "appointments"
-  | "conversation-stream";
+  | "conversation-stream"
+  | "birdeye-assist";
 
 /** Brief shell shimmer after login so the first paint mirrors real app loading. */
 const POST_LOGIN_BOOT_MS = 1200;
@@ -383,7 +386,8 @@ export default function App() {
     v === "competitors" ||
     v === "referrals" ||
     v === "payments" ||
-    v === "appointments";
+    v === "appointments" ||
+    v === "birdeye-assist";
 
   return (
     <L2NavBridgeProvider currentView={currentView}>
@@ -487,9 +491,21 @@ export default function App() {
           {!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "competitors" && (
             <CompetitorsL2NavPanel />
           )}
+          {/* Referrals L2 nav panel */}
+          {!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "referrals" && (
+            <ReferralsL2NavPanel />
+          )}
+          {/* Payments L2 nav panel */}
+          {!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "payments" && (
+            <PaymentsL2NavPanel />
+          )}
           {/* Appointments L2 nav panel */}
           {!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "appointments" && (
             <AppointmentsL2NavPanel />
+          )}
+          {/* Birdeye Assist L2 nav panel */}
+          {!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "birdeye-assist" && (
+            <BirdeyeAssistL2NavPanel />
           )}
           {/* Inbox L2 nav panel */}
           {!aiPanelOpen && !mynaWorkspaceExpanded && currentView === "inbox" && (
@@ -589,6 +605,8 @@ export default function App() {
               <AppointmentsView />
             ) : currentView === "conversation-stream" ? (
               <ConversationStream />
+            ) : currentView === "birdeye-assist" ? (
+              <BirdeyeAssistView />
             ) : (
               // Any route added to AppView but not yet wired up shows a
               // helpful placeholder instead of a blank screen.
