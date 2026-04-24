@@ -453,12 +453,13 @@ const dashboardSections = [
 
 /** Product report catalogs in Reports L2 (no "Agent Reports" parent). */
 const reportCatalogSections = [
-  { label: "Listings", children: ["All", "Google", "Apple", "Facebook", "Bing", "Yelp"] },
-  { label: "Social", children: ["All channels", "Post performance", "Response trends", "Best time to post"] },
-  { label: "Campaigns", children: ["Review campaigns", "Referral campaigns", "CX campaigns", "Custom campaigns"] },
+  { label: "Reviews AI", children: ["Overview", "Volume and ratings", "Leaderboard", "Distribution", "Responses", "NPS", "Tags", "QR Codes", "Impressions"] },
+  { label: "Listings AI", children: ["All sites", "Google", "Apple", "Facebook", "Bing", "Yelp"] },
+  { label: "Social AI", children: ["All channels", "Post performance", "Profile performance", "Response trends", "Best time to post"] },
+  { label: "Campaigns", children: ["Review requests", "Referral requests", "Referrals shared", "Referral leads", "Customer experience", "Mass texting"] },
   { label: "Inbox", children: ["Over time", "Location", "Users", "Channels"] },
-  { label: "Surveys", children: ["Survey NPS", "Responses"] },
-  { label: "Ticketing", children: ["Resolution time", "Volume"] },
+  { label: "Surveys AI", children: ["Survey NPS"] },
+  { label: "Ticketing AI", children: ["Ticket resolution time", "Ticket volume"] },
 ];
 
 export function L2NavPanel({ currentView: _currentView, onViewChange }: L2NavPanelProps) {
@@ -631,7 +632,7 @@ const reviewsConfig = {
         "NPS",
         "Tags",
         "QR Codes",
-        "Review impressions",
+        "Impressions",
       ],
     },
     {
@@ -671,13 +672,12 @@ export function ReviewsL2NavPanel() {
 const socialConfig = {
   headerAction: { label: "Create post" },
   sections: [
-    { label: "Actions", children: ["Reply manually", "Monitor agent replies"] },
     { label: "Publish", children: ["View calendar", "View drafts", "Approve posts", "Fix failed posts", "Fix rejected posts"] },
-    { label: "Engage", children: ["View all engagements", "Assigned to me", "Approve replies", "Fix rejected replies", "View spam"] },
-    { label: "Reports", children: ["All channels", "Post performance", "Response trends", "Best time to post"] },
+    { label: "Engage", children: ["View all engagements", "Respond to replies", "Approve replies", "Fix rejected replies", "View spam"] },
+    { label: "Reports", children: ["All channels", "Post performance", "Profile performance", "Response trends", "Best time to post"] },
     { label: "Competitors", children: ["Benchmarking", "Posts"] },
     { label: "Libraries", children: ["Post library", "Media library", "Reply templates"] },
-    { label: "Agents", children: ["Publishing agent", "Engagement agent"] },
+    { label: "Agents", children: ["Publishing agents", "Engagement agents"] },
     { label: "Settings", children: ["Approvals", "Link in bio", "Tags", "AI posts", "AI prompts"] },
   ],
 };
@@ -691,7 +691,6 @@ export function SocialL2NavPanel() {
    ═══════════════════════════════════════════ */
 const searchAIConfig = {
   sections: [
-    { label: "Actions", children: ["Recommendations", "Track progress"] },
     { label: "Reports", children: ["Citations", "Visibility", "Rankings", "Accuracy", "Sentiment"] },
     { label: "Settings", children: ["Prompts"] },
   ],
@@ -721,13 +720,13 @@ export function ContactsL2NavPanel(_props?: { activeItem?: string; onActiveItemC
    ═══════════════════════════════════════════ */
 const listingsConfig = {
   sections: [
-    { label: "Actions", children: ["Recommendations", "Suppress duplicates", "Google suggestions"] },
-    { label: "Ranking reports", children: ["Keywords", "Citations", "Rankings"] },
+    { label: "Actions", children: ["Recommendations", "Suppress duplicates"] },
+    { label: "Ranking reports", children: ["All sites", "Google", "Apple", "Facebook", "Bing", "Yelp"] },
     { label: "Search performance", children: ["All sites", "Google", "Apple", "Facebook", "Bing", "Yelp"] },
     { label: "Accuracy", children: ["Core sites", "Other sites"] },
-    { label: "Publish status", children: ["All listings", "By location", "By site"] },
-    { label: "Agents", children: ["Listing optimization agent"] },
-    { label: "Settings", children: ["Profiles", "Keywords", "Ranking report", "FAQs", "Products", "Google services"] },
+    { label: "Publish status", children: ["All listings", "By locations", "By sites"] },
+    { label: "Agents", children: [] },
+    { label: "Settings", children: ["Profiles", "FAQs", "Services", "Keywords & sites", "SEO radius", "Credentials"] },
   ],
 };
 
@@ -742,8 +741,8 @@ const ticketingConfig = {
   headerAction: { label: "Create ticket" },
   sections: [
     { label: "Actions", children: ["My tickets", "View all tickets"] },
-    { label: "Reports", children: ["Resolution time", "Volume"] },
-    { label: "Agents", children: ["Ticket resolution agent"] },
+    { label: "Reports", children: ["Ticket resolution time", "Ticket volume"] },
+    { label: "Agents", children: ["Ticketing agents"] },
   ],
 };
 
@@ -758,8 +757,8 @@ const campaignsConfig = {
   sections: [
     { label: "Actions", children: ["Manage automations", "Manage campaigns"] },
     { label: "Libraries", children: ["Templates", "Landing pages"] },
-    { label: "Reports", children: ["Review campaigns", "Referral campaigns", "CX campaigns", "Custom campaigns"] },
-    { label: "Settings", children: ["Workflow tags", "Communication restriction"] },
+    { label: "Reports", children: ["Review requests", "Referral requests", "Referrals shared", "Referral leads", "Customer experience", "Mass texting"] },
+    { label: "Settings", children: ["Communication restriction", "Workflow tags"] },
   ],
 };
 
@@ -773,12 +772,9 @@ export function CampaignsL2NavPanel() {
 const surveysConfig = {
   headerAction: { label: "Create survey" },
   sections: [
-    { label: "Actions", children: ["Respond to surveys"] },
-    { label: "Surveys", children: ["All surveys", "Standard surveys", "Pulse surveys"] },
-    { label: "Agents", children: ["Survey distribution agent", "Survey tagging agent"] },
-    { label: "Libraries", children: ["Request templates"] },
+    { label: "Actions", children: ["View surveys"] },
+    { label: "Reports", children: ["Survey NPS", "Responses"] },
   ],
-  footerLink: { label: "Reports", external: true },
 };
 
 export function SurveysL2NavPanel() {
@@ -807,18 +803,8 @@ const competitorsConfig = {
   sections: [
     { label: "Actions", children: ["Recommendations", "Track progress"] },
     { label: "Analysis", children: ["All signals", "Reviews", "Social"] },
-    {
-      label: "Benchmarking",
-      children: [
-        "You vs Industry",
-        "You vs Peach Tree Dental",
-        "You vs Coast Dental",
-        "You vs Altima Dental",
-        "You vs Tooth Works",
-        "You vs White Teeth",
-      ],
-    },
-    { label: "Settings", children: ["Brands & locations", "Categories & keywords", "Birdeye score"] },
+    { label: "Benchmarking", children: [] },
+    { label: "Settings", children: [] },
   ],
 };
 
@@ -839,15 +825,15 @@ const inboxSections = [
   },
   {
     label: "Leads",
-    children: ["Inquiries", "Missed calls", "Voicemails", "Appointments", "Service inquiry", "Insurance", "Billing", "Lost"],
+    children: [],
   },
   {
     label: "Feedback",
-    children: ["Reviews", "Surveys"],
+    children: [],
   },
   {
     label: "Saved filters",
-    children: ["My Filter 1", "My Filter 2", "My Filter 3"],
+    children: [],
   },
   {
     label: "Reports",
@@ -855,11 +841,11 @@ const inboxSections = [
   },
   {
     label: "Agents",
-    children: ["Lead generation agents"],
+    children: [],
   },
   {
     label: "Settings",
-    children: ["Chatbot", "Receptionist"],
+    children: [],
   },
 ];
 

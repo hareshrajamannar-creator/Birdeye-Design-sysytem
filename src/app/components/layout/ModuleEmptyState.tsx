@@ -51,7 +51,7 @@ export function ModuleEmptyState({ moduleName, activeL2Key = "" }: ModuleEmptySt
   const sectionLabel = formatL2Section(activeL2Key);
 
   return (
-    <div className="flex flex-col h-full items-center justify-center bg-white dark:bg-[#1e2229] select-none px-8">
+    <div className="flex-1 flex flex-col items-center justify-center min-h-[360px] bg-white dark:bg-[#1e2229] select-none px-8 py-12">
       {/* Icon */}
       <div className="w-14 h-14 rounded-2xl bg-[#f0f4ff] dark:bg-[#1e2d5e] flex items-center justify-center mb-5 shrink-0">
         <Sparkles className="w-6 h-6 text-[#2552ED] dark:text-[#4d7fff]" strokeWidth={1.5} />

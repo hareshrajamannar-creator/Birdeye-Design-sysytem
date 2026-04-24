@@ -13,7 +13,7 @@ export const APP_SHELL_GUTTER_SURFACE_CLASS =
 
 /** Below-top-bar card shell used in full-bleed panel stories. */
 export const APP_SHELL_BELOW_TOPBAR_CARD_CLASS =
-  "flex-1 flex flex-col min-h-0 overflow-hidden rounded-lg bg-white dark:bg-[#1e2229]";
+  "flex-1 flex min-h-0 overflow-hidden rounded-lg bg-white dark:bg-[#1e2229]";
 
 /** L1 rail + TopBar surface — matches the outer gutter colour. */
 export const APP_SHELL_RAIL_SURFACE_CLASS =
